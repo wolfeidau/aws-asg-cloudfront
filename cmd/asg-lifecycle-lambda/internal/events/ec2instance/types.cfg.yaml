@@ -1,0 +1,6 @@
+package: ec2instance
+generate:
+  models: true
+output: ec2instance-launch-types.gen.go
+output-options:
+  skip-prune: true
