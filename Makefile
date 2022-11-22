@@ -40,4 +40,7 @@ deploy-nodes:
 		--parameter-overrides ParentVPCStack=$(APPNAME)-vpc-$(STAGE)-$(BRANCH) \
 			ImageId=$(AL2_ARM_AMI_ID) \
 			PrefixListId=$(CF_PREFIX_LIST_ID) \
-			ASGDesiredCapacity=2
+			ASGDesiredCapacity=$(DESIRED_CAPACITY) \
+			HostedZoneName=$(HOSTED_ZONE_NAME) \
+			HostedZoneId=$(HOSTED_ZONE_ID) \
+			InternalServiceId=$(INTERNAL_SERVICE_ID)

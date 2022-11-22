@@ -9,6 +9,8 @@ before:
 builds:
   - id: asg-lifecycle-lambda
     main: ./cmd/asg-lifecycle-lambda/main.go
+    ldflags:
+      -s -w -X main.commit={{.ShortCommit}}
     binary: bootstrap
     env:
       - CGO_ENABLED=0

@@ -3,17 +3,20 @@ module github.com/wolfeidau/aws-asg-cloudfront
 go 1.19
 
 require (
+	github.com/alecthomas/kong v0.7.1
 	github.com/aws/aws-sdk-go-v2 v1.17.1
 	github.com/aws/aws-sdk-go-v2/config v1.18.0
 	github.com/aws/aws-sdk-go-v2/service/autoscaling v1.24.1
+	github.com/aws/aws-sdk-go-v2/service/ec2 v1.72.0
+	github.com/aws/aws-sdk-go-v2/service/route53 v1.24.0
 	github.com/deepmap/oapi-codegen v1.12.2
 	github.com/rs/zerolog v1.28.0
 	github.com/wolfeidau/lambda-go-extras v1.5.0
-	github.com/wolfeidau/lambda-go-extras/standard v0.0.0-20221113024459-109739527009
+	github.com/wolfeidau/lambda-go-extras/standard v0.0.0-20221120053827-a16ed26a83b6
 )
 
 require (
-	github.com/aws/aws-lambda-go v1.34.1 // indirect
+	github.com/aws/aws-lambda-go v1.35.0 // indirect
 	github.com/aws/aws-sdk-go-v2/credentials v1.13.0 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.12.19 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.1.25 // indirect

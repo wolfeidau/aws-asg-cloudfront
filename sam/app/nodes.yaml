@@ -15,6 +15,15 @@ Metadata:
       - PrefixListId
       - MasterLogsRetentionInDays
       - MasterVolumeSize
+    - Label:
+        default: 'DNS Parameters'
+      Parameters:
+      - HostedZoneName
+      - HostedZoneId
+    - Label:
+        default: 'Service Parameters'
+      Parameters:
+      - InternalServiceId
 Parameters:
   ParentVPCStack:
     Description: 'Stack name of parent VPC stack based on vpc/vpc-*azs.yaml template.'
@@ -46,6 +55,16 @@ Parameters:
     Default: 3
   ASGDesiredCapacity:
     Type: Number
+    Default: 2
+  HostedZoneName:
+    Description: "Hosted zone name that is used to create the DNS entry."
+    Type: String
+  HostedZoneId:
+    Description: "Hosted zone id that is used to create the DNS entry."
+    Type: String
+  InternalServiceId:
+    Type: String
+    Description: "Unique internal DNS name used by cloudfront to access the backend."
     Default: 2
 Resources:
   MasterAutoscalingTopic:
@@ -159,14 +178,28 @@ Resources:
       - Key: Name
         Value: 'web-service-node'
         PropagateAtLaunch: true
+      - Key: InternalServiceId
+        Value: !Ref InternalServiceId
+        PropagateAtLaunch: true
+      - Key: InternalServiceHostname
+        Value: !Sub "${InternalServiceId}.${HostedZoneName}"
+        PropagateAtLaunch: true
 
-  MasterAutoScalingGroupLifecycleHook:
+  MasterScaleOutAutoScalingGroupLifecycleHook:
     Type: AWS::AutoScaling::LifecycleHook
     Properties:
       AutoScalingGroupName: !Ref MasterAutoScalingGroup
       DefaultResult: ABANDON
       HeartbeatTimeout: 300
       LifecycleTransition: "autoscaling:EC2_INSTANCE_LAUNCHING"
+
+  MasterScaleInAutoScalingGroupLifecycleHook:
+    Type: AWS::AutoScaling::LifecycleHook
+    Properties:
+      AutoScalingGroupName: !Ref MasterAutoScalingGroup
+      DefaultResult: ABANDON
+      HeartbeatTimeout: 300
+      LifecycleTransition: "autoscaling:EC2_INSTANCE_TERMINATING"
 
   MasterAutoScalingGroupFunctionLogGroup:
     Type: AWS::Logs::LogGroup
@@ -180,9 +213,29 @@ Resources:
       Runtime: provided.al2
       Handler: bootstrap
       CodeUri: ../../dist/asg-lifecycle-lambda_linux_arm64.zip
+      Environment:
+        Variables:
+          HOSTED_ZONE_ID: !Ref HostedZoneId
       Policies:
       - Version: "2012-10-17"
         Statement:
+        - Effect: Allow
+          Action:
+            - "ec2:DescribeInstances"
+          Resource: "*"
+      - Version: "2012-10-17"
+        Statement:
+        - Effect: Allow
+          Action:
+            - "route53:ChangeResourceRecordSets"
+            - "route53:ListResourceRecordSets"
+          Resource: !Sub arn:aws:route53:::hostedzone/${HostedZoneId}
+      - Version: "2012-10-17"
+        Statement:
+        - Effect: Allow
+          Action:
+            - "autoscaling:DescribeAutoScalingGroups"
+          Resource: "*"
         - Effect: Allow
           Action:
             - "autoscaling:CompleteLifecycleAction"
@@ -196,6 +249,8 @@ Resources:
                   - "aws.autoscaling"
               detail-type:
                   - "EC2 Instance-launch Lifecycle Action"
+                  - "EC2 Instance-terminate Lifecycle Action"
+                  - "autoscaling:EC2_INSTANCE_LAUNCH_ERROR"
               detail:
                   AutoScalingGroupName:
                     - !Ref MasterAutoScalingGroup

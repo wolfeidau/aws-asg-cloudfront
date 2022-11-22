@@ -8,6 +8,18 @@ This project demonstrates how to combine cloudfront, EC2, route53 and auto scali
 
 The reason I built this example is that application load balancers introduce an unnecessary layer of complexity and cost in cases were your already using a CDN such as cloudfront in front of your application.
 
+# Setup
+
+To deploy this solution you need to set some environment variables.
+
+```
+export HOSTED_ZONE_NAME=example.com
+export HOSTED_ZONE_ID=ZZZZZZZZZZZZZZ
+export DESIRED_CAPACITY=2
+# Unique identifier used to build hostname
+export INTERNAL_SERVICE_ID=aaaaaaaaaaaa
+```
+
 # Diagram
 
 TODO
